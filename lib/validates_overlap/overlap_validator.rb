@@ -64,10 +64,17 @@ class OverlapValidator < ActiveModel::EachValidator
 
   # Prepare attribute name to use in sql conditions created in form 'table_name.attribute_name'
   def attribute_to_sql(attr, record)
+    isnull_start = isnull_end = ''
+    
+    if record.class.columns_hash[attr.to_s].type == :string
+      isnull_start = "ISNULL("
+      isnull_end = ",'')"
+    end
+    
     if attr.to_s.include?(".")
-      attr
+      "#{isnull_start}#{attr}#{isnull_end}"
     else
-      "#{record_table_name(record)}.#{attr}"
+      "#{isnull_start}#{record_table_name(record)}.#{attr}#{isnull_end}"
     end
   end
 
